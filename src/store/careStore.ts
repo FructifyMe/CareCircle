@@ -278,18 +278,35 @@ export const useCareStore = create<CareStore>((set, get) => ({
 
   updateCaregiver: async (caregiver) => {
     try {
+      // Convert patientIds to patient_ids for database
+      const dbCaregiver = {
+        ...caregiver,
+        patient_ids: caregiver.patientIds // Convert from patientIds to patient_ids
+      };
+      delete dbCaregiver.patientIds; // Remove the frontend field
+
+      console.log('Updating caregiver in DB:', dbCaregiver);
       const { error } = await supabase
         .from('caregivers')
-        .update(caregiver)
+        .update(dbCaregiver)
         .eq('id', caregiver.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      // Update local state
       set(state => ({
         caregivers: state.caregivers.map(c => 
-          c.id === caregiver.id ? caregiver : c
+          c.id === caregiver.id ? {
+            ...caregiver,
+            patient_ids: caregiver.patientIds // Keep both formats in local state
+          } : c
         )
       }));
+
+      console.log('Successfully updated caregiver');
     } catch (error) {
       console.error('Error updating caregiver:', error);
       throw error;
