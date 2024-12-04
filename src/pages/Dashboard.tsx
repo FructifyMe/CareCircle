@@ -3,12 +3,16 @@ import { Search, Bell, Filter } from 'lucide-react';
 import { TaskManager } from '../components/tasks/TaskManager';
 import { ChatWindow } from '../components/chat/ChatWindow';
 import { useCareStore } from '../store/careStore';
+import { PatientSelector } from '../components/patient/PatientSelector';
 
 export const Dashboard: React.FC = () => {
   const currentPatient = useCareStore(state => state.currentPatient);
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-4">
+      {/* Patient Selector */}
+      <PatientSelector />
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -16,7 +20,7 @@ export const Dashboard: React.FC = () => {
           <p className="text-secondary-600">
             {currentPatient 
               ? `Caring for ${currentPatient.name}`
-              : 'Welcome to Care Coordination'}
+              : 'Please select a patient to begin'}
           </p>
         </div>
         
@@ -41,31 +45,39 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Active Tasks', value: '12', trend: '3 due today' },
-          { label: 'Upcoming Shifts', value: '8', trend: 'Next 7 days' },
-          { label: 'Unread Messages', value: '5', trend: 'Last 24 hours' },
-          { label: 'Recent Expenses', value: '$324', trend: 'This month' }
-        ].map(({ label, value, trend }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-sm text-secondary-600">{label}</p>
-            <p className="text-2xl font-semibold text-secondary-900 mt-1">{value}</p>
-            <p className="text-xs text-secondary-500 mt-1">{trend}</p>
+      {currentPatient ? (
+        <>
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: 'Active Tasks', value: '12', trend: '3 due today' },
+              { label: 'Upcoming Shifts', value: '8', trend: 'Next 7 days' },
+              { label: 'Unread Messages', value: '5', trend: 'Last 24 hours' },
+              { label: 'Recent Expenses', value: '$324', trend: 'This month' }
+            ].map(({ label, value, trend }) => (
+              <div key={label} className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="text-sm text-secondary-600">{label}</p>
+                <p className="text-2xl font-semibold text-secondary-900 mt-1">{value}</p>
+                <p className="text-xs text-secondary-500 mt-1">{trend}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <TaskManager />
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <TaskManager />
+            </div>
+            <div>
+              <ChatWindow />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-yellow-700">Please select a patient to view the dashboard.</p>
         </div>
-        <div>
-          <ChatWindow />
-        </div>
-      </div>
+      )}
     </div>
   );
 };

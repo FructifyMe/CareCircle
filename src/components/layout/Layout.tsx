@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { PatientInfo } from '../patient/PatientInfo';
+import { PatientSelector } from '../patient/PatientSelector';
 
 export const Layout: React.FC = () => {
   return (
@@ -9,7 +9,7 @@ export const Layout: React.FC = () => {
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="p-8">
-          <PatientInfo />
+          <PatientSelector />
           <Outlet />
         </div>
       </main>

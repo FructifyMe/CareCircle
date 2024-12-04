@@ -8,76 +8,94 @@ import { useCareStore } from '../../store/careStore';
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
-  const currentCaregiver = useCareStore(state => state.currentCaregiver);
+  const { currentCaregiver, signOut } = useCareStore();
+  console.log('Sidebar - currentCaregiver:', currentCaregiver);
   const isAdmin = currentCaregiver?.role === 'admin';
+  const isSuperAdmin = currentCaregiver?.role === 'super_admin';
+  console.log('Sidebar - isSuperAdmin:', isSuperAdmin);
 
-  const handleSignOut = () => {
-    // TODO: Implement sign out logic
-    console.log('Sign out');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const navItems = [
-    { icon: Home, label: 'Dashboard', to: '/' },
+    { icon: Home, label: 'Dashboard', to: '/dashboard' },
+    ...(isSuperAdmin ? [{ icon: UserPlus, label: 'Super Admin', to: '/super-admin' }] : []),
     { icon: Calendar, label: 'Shifts', to: '/shifts' },
     { icon: ClipboardList, label: 'Tasks', to: '/tasks' },
     { icon: MessageSquare, label: 'Chat', to: '/chat' },
     { icon: DollarSign, label: 'Expenses', to: '/expenses' },
-    // Only show Add Patient for admin users
-    ...(isAdmin ? [{ icon: UserPlus, label: 'Add Patient', to: '/onboarding' }] : []),
-    { icon: Settings, label: 'Settings', to: '/settings' }
+    ...(isAdmin ? [{ icon: UserPlus, label: 'Onboarding', to: '/onboarding' }] : []),
+    { icon: Settings, label: 'Settings', to: '/settings' },
   ];
 
   return (
-    <div className="bg-white border-r border-gray-200 text-secondary-600 w-64 min-h-screen p-4">
-      <div className="flex items-center gap-2 mb-8">
-        <Stethoscope className="w-8 h-8 text-primary-600" />
-        <div>
-          <span className="text-xl font-bold text-primary-600">CareCircle</span>
-          <span className="text-xs block text-secondary-500">Care Coordination Platform</span>
-          <span className="text-xs block text-secondary-400">by Fructify LLC</span>
+    <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
+      {/* Logo */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <Stethoscope className="h-8 w-8 text-primary-600" />
+          <div>
+            <h1 className="text-xl font-bold text-primary-600">CareCircle</h1>
+            <p className="text-xs text-gray-500">Care Coordination Platform</p>
+            <p className="text-xs text-gray-500">by Fructify LLC</p>
+          </div>
         </div>
       </div>
-      
-      <nav className="space-y-1">
+
+      {/* Navigation */}
+      <nav className="p-4 space-y-1">
         {navItems.map(({ icon: Icon, label, to }) => (
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) => `
-              flex items-center gap-3 w-full p-3 rounded-lg transition-colors
-              ${isActive
-                ? 'bg-primary-50 text-primary-700 font-medium'
-                : 'hover:bg-gray-50 text-secondary-600'}
-            `}
+            className={({ isActive }) =>
+              `flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                isActive
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`
+            }
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="h-5 w-5" />
             <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <div className="flex items-center gap-3 mb-6 px-3">
-          <img
-            src={currentCaregiver?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=40&h=40"}
-            alt="Caregiver profile"
-            className="w-10 h-10 rounded-full object-cover"
-          />
-          <div>
-            <p className="text-sm font-medium text-secondary-900">
-              {currentCaregiver?.name || 'Guest User'}
-            </p>
-            <p className="text-xs text-secondary-500">
-              {currentCaregiver?.role === 'admin' ? 'Administrator' : 'Caregiver'}
-            </p>
+      {/* User Profile & Sign Out */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        {currentCaregiver && (
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+              {currentCaregiver.photo ? (
+                <img
+                  src={currentCaregiver.photo}
+                  alt={currentCaregiver.name}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-500 text-sm">
+                  {currentCaregiver.name.charAt(0)}
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{currentCaregiver.name}</p>
+              <p className="text-xs text-gray-500 capitalize">{currentCaregiver.role}</p>
+            </div>
           </div>
-        </div>
-
+        )}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full p-3 text-secondary-600 hover:bg-gray-50 rounded-lg transition-colors"
+          className="flex items-center space-x-2 text-red-600 hover:text-red-700 w-full px-4 py-2 rounded-md hover:bg-red-50 transition-colors"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="h-5 w-5" />
           <span>Sign Out</span>
         </button>
       </div>
